@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --animate-shine: shine 2s linear infinite;
+  --animate-kelap-kelip: kelapKelip 2s ease-in-out infinite;
+
+  @keyframes shine {
+    from {
+      transform: translateX(-100%) rotate(45deg);
+    }
+    to {
+      transform: translateX(100%) rotate(45deg);
+    }
+  }
+
+  @keyframes kelapKelip {
+    0%, 100% { box-shadow: 4px 4px 0px var(--shadow-color); border-color: var(--border-color); }
+    50% { box-shadow: 0px 0px 15px 5px #FF90E8; border-color: #FF90E8; }
+  }
+}
+
+:root {
+  --app-bg: #FFFDF5;
+  --app-dots: #000;
+  --border-color: #000;
+  --shadow-color: #000;
+  --text-main: #000;
+  
+  --surface-primary: #fff;
+  --surface-secondary: #EAEAFF;
+  --surface-header: #FFDE59;
+  
+  --table-bg: #FFFDF5;
+  --table-header: #FFDE59;
+  --table-hover: #f3f4f6;
+
+  --gradient-start: #1f2937;
+  --gradient-end: #000;
+}
+
+.dark {
+  --app-bg: #1A1A1D;
+  --app-dots: rgba(255, 255, 255, 0.15);
+  --border-color: #FFF;
+  --shadow-color: #FFF;
+  --text-main: #FFF;
+  
+  --surface-primary: #2D2D31;
+  --surface-secondary: #3A3A5A;
+  --surface-header: #1A1A1D;
+  
+  --table-bg: #2D2D31;
+  --table-header: #3A3A5A;
+  --table-hover: #4B4B63;
+
+  --gradient-start: #f3f4f6;
+  --gradient-end: #9ca3af;
+}
+
+body {
+  background-color: var(--app-bg);
+  background-image: radial-gradient(circle at 2px 2px, var(--app-dots) 1px, transparent 0);
+  background-size: 24px 24px;
+  color: var(--text-main);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.bg-surface-primary { background-color: var(--surface-primary) !important; }
+.bg-surface-secondary { background-color: var(--surface-secondary) !important; }
+.bg-surface-header { background-color: var(--surface-header) !important; }
+
+.bg-table { background-color: var(--table-bg) !important; }
+.bg-table-header { background-color: var(--table-header) !important; }
+.hover-table-row:hover { background-color: var(--table-hover) !important; }
+
+.neo-border { border-color: var(--border-color) !important; }
+.neo-shadow { box-shadow: 4px 4px 0px var(--shadow-color) !important; }
+.neo-shadow-lg { box-shadow: 8px 8px 0px var(--shadow-color) !important; }
+.neo-shadow-sm { box-shadow: 2px 2px 0px var(--shadow-color) !important; }
+
+.neo-text { color: var(--text-main) !important; }
+.neo-divide > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--border-color) !important;
+}
+
+.neo-box {
+  border: 4px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 8px 8px 0px var(--shadow-color);
+  background-color: var(--surface-primary);
+  transition: all 0.2s ease-in-out;
+}
+
+.neo-btn {
+  border: 4px solid var(--border-color);
+  border-radius: 9999px;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  transition: all 0.1s ease-in-out;
+}
+.neo-btn:active:not(:disabled) {
+  transform: translate(4px, 4px) scale(1) !important;
+  box-shadow: 0px 0px 0px var(--border-color) !important;
+}
+.neo-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { 
+    background: white !important; 
+    background-image: none !important; 
+    color: black !important; 
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .neo-shadow, .neo-shadow-lg, .neo-shadow-sm, .neo-box, .neo-btn { 
+    box-shadow: none !important; 
+  }
+  .neo-border { border-color: #000 !important; }
+  .dark {
+    /* Override dark mode variables for print */
+    --app-bg: #FFFDF5;
+    --border-color: #000;
+    --text-main: #000;
+    --surface-primary: #fff;
+    --surface-secondary: #EAEAFF;
+    --surface-header: #FFDE59;
+    --table-bg: #FFFDF5;
+    --table-header: #FFDE59;
+    --table-hover: #f3f4f6;
+
+    --gradient-start: #1f2937;
+    --gradient-end: #000;
+  }
+}

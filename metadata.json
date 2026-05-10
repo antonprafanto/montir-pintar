@@ -1,0 +1,8 @@
+{
+  "name": "Montir Pintar",
+  "description": "Asisten pemantau perawatan kendaraan otomatis yang mampu mendeteksi gambar odometer dan nota bengkel untuk rekomendasi servis.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
