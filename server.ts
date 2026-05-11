@@ -32,6 +32,16 @@ async function startServer() {
     // ESM compatibility
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
+    
+    // Return 404 for missing assets (prevent catching _service-worker.js or other old js files)
+    app.use((req, res, next) => {
+      if (req.path.endsWith('.js') || req.path.endsWith('.css') || req.path.endsWith('.json') || req.path.endsWith('.map')) {
+        res.status(404).end();
+      } else {
+        next();
+      }
+    });
+
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
