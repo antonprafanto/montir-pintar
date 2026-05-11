@@ -36,13 +36,6 @@ export default function TipsAndMyths() {
     setCurrentIndex(Math.floor(Math.random() * TIPS_DATA.length));
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % TIPS_DATA.length);
-    }, 15000);
-    return () => clearInterval(interval);
-  }, [currentIndex]);
-
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % TIPS_DATA.length);
   };
