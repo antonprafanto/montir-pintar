@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, useMap, useMapsLibrary, InfoWindow, useAdvancedMarkerRef } from '@vis.gl/react-google-maps';
 import { MapPin, Navigation, Info, AlertTriangle } from 'lucide-react';
 
-const API_KEY = process.env.GOOGLE_MAPS_PLATFORM_KEY || '';
+// @ts-ignore
+const envObj = typeof window !== 'undefined' && window.process && window.process.env ? window.process.env : process.env;
+const API_KEY = envObj.GOOGLE_MAPS_PLATFORM_KEY || '';
 const hasValidKey = Boolean(API_KEY) && API_KEY !== 'YOUR_API_KEY';
 
 const MarkerWithInfoWindow: React.FC<{

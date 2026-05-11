@@ -30,9 +30,6 @@ export default defineConfig(({mode}) => {
         }
       })
     ],
-    define: {
-      'process.env.GOOGLE_MAPS_PLATFORM_KEY': JSON.stringify(env.GOOGLE_MAPS_PLATFORM_KEY),
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

@@ -4,9 +4,23 @@ import path from "path";
 
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: "50mb" }));
+
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok" });
+  });
+
+  app.get('/api/config.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.send(`
+      window.process = window.process || {};
+      window.process.env = window.process.env || {};
+      window.process.env.GEMINI_API_KEY = ${JSON.stringify(process.env.GEMINI_API_KEY || '')};
+      window.process.env.GOOGLE_MAPS_PLATFORM_KEY = ${JSON.stringify(process.env.GOOGLE_MAPS_PLATFORM_KEY || '')};
+    `);
+  });
 
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

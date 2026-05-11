@@ -31,7 +31,9 @@ export interface ManualHistory {
 }
 
 function getAIClient(): GoogleGenAI {
-  let key = process.env.GEMINI_API_KEY;
+  // @ts-ignore
+  const envObj = typeof window !== 'undefined' && window.process && window.process.env ? window.process.env : process.env;
+  let key = envObj.GEMINI_API_KEY;
   if (!key) {
     throw new Error('GEMINI_API_KEY environment variable is missing.');
   }
