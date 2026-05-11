@@ -646,6 +646,12 @@ export default function App() {
         el.style.overflow = 'visible';
       });
 
+      // Set fixed dimension for consistent desktop-like output
+      const originalWidth = printElement.style.width;
+      const originalPadding = printElement.style.padding;
+      printElement.style.width = '800px';
+      printElement.style.padding = '20px';
+
       // Small delay to let DOM update
       await new Promise(res => setTimeout(res, 300));
 
@@ -653,6 +659,7 @@ export default function App() {
         quality: 0.9,
         backgroundColor: '#ffffff',
         pixelRatio: 2,
+        width: 800,
       });
 
       // Get dimensions to maintain aspect ratio
@@ -662,26 +669,23 @@ export default function App() {
         img.onload = resolve;
       });
 
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
+      // Create a single-page PDF with exactly the dimensions of the captured image
+      // This prevents elements from being cut in half across pages
+      const pdfWidth = 800;
       const pdfHeight = (img.height * pdfWidth) / img.width;
       
-      let heightLeft = pdfHeight;
-      let position = 0;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [pdfWidth, pdfHeight]
+      });
 
-      pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pdf.internal.pageSize.getHeight();
-
-      while (heightLeft >= 0) {
-         position = heightLeft - pdfHeight;
-         pdf.addPage();
-         pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
-         heightLeft -= pdf.internal.pageSize.getHeight();
-      }
-
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       pdf.save('Hasil-Analisis-Montir-Pintar.pdf');
 
       // Restore elements
+      printElement.style.width = originalWidth;
+      printElement.style.padding = originalPadding;
       noPrints.forEach((el, i) => el.style.display = originalStlyes[i]);
       scrollables.forEach((el, i) => {
         el.style.maxHeight = scrollStlyes[i].maxH;
