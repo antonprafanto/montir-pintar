@@ -3,6 +3,8 @@ import { UploadCloud, FileImage, X, Activity, Wrench, ShieldCheck, AlertTriangle
 import { analyzeVehicleImages, RideCheckResult } from "./lib/gemini";
 import { motion, AnimatePresence } from "motion/react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { toJpeg } from 'html-to-image';
+import { jsPDF } from 'jspdf';
 import { NearbyGarages } from "./components/NearbyGarages";
 import TipsAndMyths from "./components/TipsAndMyths";
 
@@ -602,6 +604,103 @@ export default function App() {
     ? savedHistory.filter(h => h.vehicleId === historyFilterVehicleId)
     : savedHistory;
 
+  const handleDownloadPdf = async () => {
+    const printElement = document.getElementById("pdf-content");
+    if (!printElement) return;
+
+    // Save previous state to restore later
+    const prevBgColor = document.documentElement.style.backgroundColor;
+    const prevIsDark = isDarkMode;
+
+    // Temporarily force light theme for better PDF rendering
+    setIsDarkMode(false);
+    document.documentElement.classList.remove('dark');
+    document.body.style.backgroundColor = '#FFFFFF';
+    
+    // Add a temporary overlay to show users resolving
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    overlay.style.zIndex = '9999';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.color = '#fff';
+    overlay.style.fontSize = '20px';
+    overlay.style.fontWeight = 'bold';
+    overlay.innerText = 'Mang AI lagi nyetak PDF... Tunggu bentar bosku ⚡';
+    document.body.appendChild(overlay);
+
+    try {
+      // Hide non-printable elements
+      const noPrints = document.querySelectorAll('.no-print') as NodeListOf<HTMLElement>;
+      const originalStlyes = Array.from(noPrints).map(el => el.style.display);
+      noPrints.forEach(el => el.style.display = 'none');
+
+      // Expand scrollable elements for capture
+      const scrollables = printElement.querySelectorAll('.overflow-y-auto, .overflow-x-auto, .max-h-\\[90vh\\]') as NodeListOf<HTMLElement>;
+      const scrollStlyes = Array.from(scrollables).map(el => ({ maxH: el.style.maxHeight, overflow: el.style.overflow }));
+      scrollables.forEach(el => {
+        el.style.maxHeight = 'none';
+        el.style.overflow = 'visible';
+      });
+
+      // Small delay to let DOM update
+      await new Promise(res => setTimeout(res, 300));
+
+      const imgData = await toJpeg(printElement, {
+        quality: 0.9,
+        backgroundColor: '#ffffff',
+        pixelRatio: 2,
+      });
+
+      // Get dimensions to maintain aspect ratio
+      const img = new Image();
+      img.src = imgData;
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (img.height * pdfWidth) / img.width;
+      
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
+
+      while (heightLeft >= 0) {
+         position = heightLeft - pdfHeight;
+         pdf.addPage();
+         pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+         heightLeft -= pdf.internal.pageSize.getHeight();
+      }
+
+      pdf.save('Hasil-Analisis-Montir-Pintar.pdf');
+
+      // Restore elements
+      noPrints.forEach((el, i) => el.style.display = originalStlyes[i]);
+      scrollables.forEach((el, i) => {
+        el.style.maxHeight = scrollStlyes[i].maxH;
+        el.style.overflow = scrollStlyes[i].overflow;
+      });
+
+    } catch (err) {
+      console.error('Failed to generate PDF:', err);
+      alert('Waduh gagal cetak PDF nih bos. Coba lagi yak!');
+    } finally {
+      document.body.removeChild(overlay);
+      document.body.style.backgroundColor = prevBgColor;
+      if (prevIsDark) {
+        setIsDarkMode(true);
+        document.documentElement.classList.add('dark');
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen font-sans selection:bg-[#FF90E8] neo-text pb-20 sm:pb-24">
       <header className="bg-surface-header border-b-4 neo-border sticky top-0 z-50 neo-shadow transition-colors duration-300">
@@ -963,13 +1062,14 @@ export default function App() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8"
+            id="pdf-content"
           >
             {/* Header / Actions */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
                <h2 className="text-2xl sm:text-3xl font-black neo-text">Hasil Analisis</h2>
                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                  <button
-                   onClick={() => window.print()}
+                   onClick={handleDownloadPdf}
                    className="flex-1 border-4 neo-border bg-[#FFDE59] !bg-[#FFDE59] text-black px-4 sm:px-5 py-2.5 rounded-xl sm:rounded-full neo-shadow sm:neo-shadow font-black flex items-center justify-center gap-2 hover:scale-105 transition-transform"
                  >
                    <Printer className="w-5 h-5 flex-shrink-0" strokeWidth={3} />
